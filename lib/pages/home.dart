@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:data/data.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class HomePage extends StatefulWidget {
+final valueProvider = StateProvider<double>(
+  (ref) => 1.0,
+);
+
+class HomePage extends StatefulHookConsumerWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  double value = 1.0;
+class _HomePageState extends ConsumerState<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    ref.read(valueProvider);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,31 +33,76 @@ class _HomePageState extends State<HomePage> {
           Table(
             border: TableBorder.all(),
             children: [
+              TableRow(
+                children: [
+                  TableCell(
+                    child: Container(),
+                  ),
+                  for (var l=0;l<=20;l++) 
+                    TableCell(
+                      child: Center(
+                        child: Text(
+                          l.toString(),
+                          textAlign: TextAlign.center,
+                        )
+                      )
+                    ),
+                ],
+              ),
               for (var j=0;j<=20;j++)
                 TableRow(
                   children: [
-                    for (var i=0;i<=20;i++) 
                       TableCell(
-                        child: Container(
-                          color: (BinomialDistribution(j+i, value).cumulativeProbability(j) <= 0.1) ? Colors.red : (BinomialDistribution(i+j, value).cumulativeProbability(j) >= 0.9) ? Colors.green : null,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 2.0),
-                            child: Text(BinomialDistribution(j+i, value).cumulativeProbability(j).toStringAsFixed(2))
+                        child: Center(
+                          child: Text(
+                            j.toString(),
+                            textAlign: TextAlign.center,
                           ),
                         ),
                       ),
+                    for (var i=0;i<=20;i++) 
+                        tableCell(j, i),
                   ],
                 ),
             ],
           ),
           TextField(
             onChanged: (string) {
-              setState(() {
-                value = double.parse(string);
-              });
+              if (string == "") {
+                return;
+              }
+              
+              var input = double.parse(string);
+
+              // Guard Clause (Outside of 0.0 - 1.0)
+              if (input > 1.0 || input < 0.0) { 
+                return;
+              }
+
+              ref.read(valueProvider.notifier).update((state) => double.parse(string));
             }
           ),
         ],
+      ),
+    );
+  }
+
+
+  TableCell tableCell(int j, int i) {
+    final value = ref.watch(valueProvider);
+    var result = BinomialDistribution(j+i, value).cumulativeProbability(j);
+    return TableCell(
+      child: Container(
+        color: (result <= 0.1) ? const Color.fromRGBO(240, 186, 182, 1) : (result >= 0.9) ? const Color.fromRGBO(169, 220, 194, 1): null,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 3.5, top: 0.5, bottom: 0.5),
+          child: Center(
+            child: Text(
+              result.toStringAsFixed(2),
+              textAlign: TextAlign.right,
+            )
+          ),
+        ),
       ),
     );
   }
