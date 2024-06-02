@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:binomial_visual/pages/home.dart';
+import 'package:binomial_visual/pages/home/home.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() => runApp(
