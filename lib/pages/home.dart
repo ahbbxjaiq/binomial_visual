@@ -30,65 +30,91 @@ class _HomePageState extends ConsumerState<HomePage> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          Table(
-            border: TableBorder.all(),
-            children: [
-              TableRow(
-                children: [
-                  TableCell(
-                    child: Container(),
-                  ),
-                  for (var l=0;l<=20;l++) 
-                    TableCell(
-                      child: Center(
-                        child: Text(
-                          l.toString(),
-                          textAlign: TextAlign.center,
-                        )
-                      )
-                    ),
-                ],
-              ),
-              for (var j=0;j<=20;j++)
-                TableRow(
-                  children: [
-                      TableCell(
-                        child: Center(
-                          child: Text(
-                            j.toString(),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                    for (var i=0;i<=20;i++) 
-                        tableCell(j, i),
-                  ],
-                ),
-            ],
-          ),
-          TextField(
-            onChanged: (string) {
-              if (string == "") {
-                return;
-              }
-              
-              var input = double.parse(string);
-
-              // Guard Clause (Outside of 0.0 - 1.0)
-              if (input > 1.0 || input < 0.0) { 
-                return;
-              }
-
-              ref.read(valueProvider.notifier).update((state) => double.parse(string));
-            }
-          ),
+          const BinomialTable(),
+          UserInput(ref: ref),
         ],
       ),
     );
   }
 
 
-  TableCell tableCell(int j, int i) {
+}
+
+class UserInput extends StatelessWidget {
+  const UserInput({
+    super.key,
+    required this.ref,
+  });
+
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      onChanged: (string) {
+        if (string == "") {
+          return;
+        }
+        
+        var input = double.parse(string);
+    
+        // Guard Clause (Outside of 0.0 - 1.0)
+        if (input > 1.0 || input < 0.0) { 
+          return;
+        }
+    
+        ref.read(valueProvider.notifier).update((state) => double.parse(string));
+      }
+    );
+  }
+}
+
+class BinomialTable extends ConsumerWidget {
+  const BinomialTable({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Table(
+      border: TableBorder.all(),
+      children: [
+        TableRow(
+          children: [
+            TableCell(
+              child: Container(),
+            ),
+            for (var l=0;l<=20;l++) 
+              TableCell(
+                child: Center(
+                  child: Text(
+                    l.toString(),
+                    textAlign: TextAlign.center,
+                  )
+                )
+              ),
+          ],
+        ),
+        for (var j=0;j<=20;j++)
+          TableRow(
+            children: [
+                TableCell(
+                  child: Center(
+                    child: Text(
+                      j.toString(),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              for (var i=0;i<=20;i++) 
+                  tableCell(j, i, ref),
+            ],
+          ),
+      ],
+    );
+  }
+
+  TableCell tableCell(int j, int i, WidgetRef ref) {
     final value = ref.watch(valueProvider);
     var result = BinomialDistribution(j+i, value).cumulativeProbability(j);
     return TableCell(
